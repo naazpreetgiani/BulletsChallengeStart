@@ -11,7 +11,6 @@ let mouseIsPressed = false;
 let mouseX, mouseY;
 let leftPressed = false;
 let rightPressed = false;
-let mouseClicked = false;
 
 let player = {
     x: cnv.width / 2,
@@ -26,7 +25,10 @@ for (let n = 1; n <= 5; n++) {
     circles.push(randomCircle());
 }
 
-
+let bullets = [];
+for (let n = 1; n <= 5; n++) {
+    bullets.push(shoot());
+}
 
 window.addEventListener("load", draw)
 
@@ -94,28 +96,6 @@ function randomCircle() {
     }
 }
 
-//Rectangle Stuff
-
-function drawRectangle(aRectangle) { 
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "red";
-    ctx.strokeRect(aRectangle.x, aRectangle.y, aRectangle.sx, aRectangle.sy);
-}
-   
-function moveRectangle(aRectangle) {
-    aRectangle.y += aRectangle.ys;
-    aRectangle.x += aRectangle.xs;
-   
-    //Check for collisions with canvas boundaries
-    if (aRectangle.y > cnv.height || aRectangle.y < 0) {
-        aRectangle.y -= aRectangle.y;
-    }
-
-    if (aRectangle.x > cnv.width || aRectangle.x < 0) {
-        aRectangle.x -= aRectangle.x;
-    }
-}
-
 // Event Listeners & Handlers
 document.addEventListener("keydown", keydownHandler);
 document.addEventListener("keyup", keyupHandler);
@@ -147,25 +127,31 @@ function keyupHandler(e) {
     //Check for keys pressed
    if (e.code === "ArrowLeft") {
       leftPressed = false;
-  } else if (e.code === "ArrowRight") {
+    } else if (e.code === "ArrowRight") {
       rightPressed = false;
-  } 
+    } 
 }
 
 function mousedownHandler() {
-    mouseClicked = true;
+    mouseIsPressed = true;
+    if (mouseIsPressed) {
+        for (let i = 0; i < bullets.length; i++) {
+            let bullet = bullets[i];         
+            moveBullet(bullet);
+            for (let j = 0; j < circles.length; j++) {
+                let circle = circles[j];
+                let distance = Math.sqrt((bullet.x - circle.x) ** 2 + (bullet.y - circle.y) ** 2);
 
-    if (mouseClicked) {
-        // Bullets Array
-        let bullets = [];
-        for (let n = 1; n <= 5; n++) {
-            bullets.push(shoot());
-            let bullet = bullets[i];
-            let distance = Math.sqrt((bullet.x - circle.x) ** 2 + (bullet.y - circle.y) ** 2);
-    
-            if (mouseIsPressed && distance <= bullet.r) {
-            bullets.splice(i, 1);
-        }
+                if (distance <= bullet.r + circle.r) {
+                    // Handle collision, e.g., remove the bullet and circle
+                    bullets.splice(i, 1);
+                    circles.splice(j, 1);
+                }
+
+                if (bullet.y > 0) {
+                   bullet.y -= 2;
+                }   
+            }   
         }
     }
 }
@@ -175,10 +161,21 @@ function shoot() {
         x: player.x,
         y: player.y,
         r: 5,
-        ys: 3
+        s: 3
     }
+}  
+
+function moveBullet(aBullet) {
+       aBullet.y += aBullet.s;
+   
+       if (aBullet.y > 600) {
+           aBullet.y = 0;
+       }
 }
 
+
+
+
 function mouseupHandler() {
-    mouseClicked = false;
+    mouseIsPressed = false;
 }
