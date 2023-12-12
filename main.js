@@ -173,9 +173,6 @@ function moveBullet(aBullet) {
        }
 }
 
-
-
-
 function mouseupHandler() {
     mouseIsPressed = false;
 }
