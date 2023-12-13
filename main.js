@@ -61,7 +61,7 @@ function draw() {
 
 function drawCircle(aCircle) {
  ctx.lineWidth = 3;   
- ctx.strokeStyle = "green";
+ ctx.strokeStyle = `${aCircle.c}`;
  ctx.beginPath();
  ctx.arc(aCircle.x, aCircle.y, aCircle.r, 0, 2 * Math.PI)
  ctx.stroke();
@@ -92,7 +92,8 @@ function randomCircle() {
         y: randomInt(0, cnv.height),
         r: randomInt(10, 50),
         xs: randomInt(1, 5),
-        ys: randomInt(1, 5)
+        ys: randomInt(1, 5),
+        c: randomRGB
     }
 }
 
@@ -161,16 +162,26 @@ function shoot() {
         x: player.x,
         y: player.y,
         r: 5,
-        s: 3
+        s: 3,
+        c: randomRGB()
     }
 }  
 
+function drawBullet(aBullet) {
+    ctx.lineWidth = 3;   
+    ctx.strokeStyle = `${aBullet.c}`;
+    ctx.beginPath();
+    ctx.arc(aBullet.x, aBullet.y, aBullet.r, 0, 2 * Math.PI)
+    ctx.stroke();
+}
+
 function moveBullet(aBullet) {
-       aBullet.y += aBullet.s;
+    console.log(aBullet.y);
+    aBullet.y += aBullet.s;
    
-       if (aBullet.y > 600) {
-           aBullet.y = 0;
-       }
+    if (aBullet.y > 600) {
+       aBullet.y = 0;
+    }
 }
 
 function mouseupHandler() {
