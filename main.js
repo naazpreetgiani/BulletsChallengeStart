@@ -12,6 +12,7 @@ let mouseX, mouseY;
 let leftPressed = false;
 let rightPressed = false;
 
+// Player Characteristics
 let player = {
     x: cnv.width / 2,
     y: 550,
@@ -25,10 +26,8 @@ for (let n = 1; n <= 5; n++) {
     circles.push(randomCircle());
 }
 
+// Bullets Array
 let bullets = [];
-for (let n = 1; n <= 5; n++) {
-    bullets.push(shoot());
-}
 
 window.addEventListener("load", draw)
 
@@ -36,7 +35,7 @@ function draw() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
 
-    //Draw Boundary
+    // Draw Boundary Line
     ctx.lineWidth = 3;
     ctx.strokeStyle = "white"
     ctx.beginPath();
@@ -44,14 +43,45 @@ function draw() {
     ctx.lineTo(800, 500);
     ctx.stroke();
    
+    // Draw Player
     ctx.fillStyle = "white";
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.r, 0, 2 * Math.PI)
     ctx.fill();
 
-   for (let i = 0; i < circles.length; i++) {
-       moveCircle(circles[i]);
-       drawCircle(circles[i]);
+    for (let i = 0; i < circles.length; i++) {
+        let circle = circles[i];
+        drawCircle(circle);
+        moveCircle(circle);
+        
+        // Check if player collides with circle
+        let d = Math.sqrt((player.x - circles.x)**2 + (player.y - circles.y)**2);
+        if (d < player.r + circles.r) {
+          player.r += (circles.r / 8);
+          console.log(circle.length);
+          circles.splice(i, 1);
+        }
+    }
+
+    for (let i = 0; i < bullets.length; i++) {
+        let bullet = bullets[i];
+        drawBullet(bullet);
+        moveBullet(bullet);
+
+        for (let n = 0; n < circles.length; n++) {
+            let circle = circles[n];
+            let distance = Math.sqrt((bullet.x - circle.x) ** 2 + (bullet.y - circle.y) ** 2);
+
+            if (distance <= bullet.r + circle.r) {
+                // Handle collision, e.g., remove the bullet and circle
+                bullets.splice(i, 1);
+                circles.splice(n, 1);
+            }
+ 
+            if (bullet.y < 0) {
+                bullets.splice(i, 1);
+            }
+        }   
     }
 
  requestAnimationFrame(draw);
@@ -93,8 +123,32 @@ function randomCircle() {
         r: randomInt(10, 50),
         xs: randomInt(1, 5),
         ys: randomInt(1, 5),
-        c: randomRGB
+        c: randomRGB()
     }
+}
+
+// Bullet Stuff
+
+function singleBullet() {
+    return {
+        x: player.x,
+        y: player.y,
+        r: 5,
+        s: 3,
+        c: "white"
+    }
+}  
+
+function drawBullet(aBullet) {
+    ctx.lineWidth = 3;   
+    ctx.fillStyle = `${aBullet.c}`;
+    ctx.beginPath();
+    ctx.arc(aBullet.x, aBullet.y, aBullet.r, 0, 2 * Math.PI)
+    ctx.fill();
+}
+
+function moveBullet(aBullet) {
+    aBullet.y -= aBullet.s;
 }
 
 // Event Listeners & Handlers
@@ -136,52 +190,11 @@ function keyupHandler(e) {
 function mousedownHandler() {
     mouseIsPressed = true;
     if (mouseIsPressed) {
-        for (let i = 0; i < bullets.length; i++) {
-            let bullet = bullets[i];         
-            moveBullet(bullet);
-            for (let j = 0; j < circles.length; j++) {
-                let circle = circles[j];
-                let distance = Math.sqrt((bullet.x - circle.x) ** 2 + (bullet.y - circle.y) ** 2);
-
-                if (distance <= bullet.r + circle.r) {
-                    // Handle collision, e.g., remove the bullet and circle
-                    bullets.splice(i, 1);
-                    circles.splice(j, 1);
-                }
-
-                if (bullet.y > 0) {
-                   bullet.y -= 2;
-                }   
-            }   
+       for (let i = 0; i < 1; i++) {
+            bullets.push(singleBullet());
         }
     }
-}
-
-function shoot() {
-    return {
-        x: player.x,
-        y: player.y,
-        r: 5,
-        s: 3,
-        c: randomRGB()
-    }
-}  
-
-function drawBullet(aBullet) {
-    ctx.lineWidth = 3;   
-    ctx.strokeStyle = `${aBullet.c}`;
-    ctx.beginPath();
-    ctx.arc(aBullet.x, aBullet.y, aBullet.r, 0, 2 * Math.PI)
-    ctx.stroke();
-}
-
-function moveBullet(aBullet) {
-    console.log(aBullet.y);
-    aBullet.y += aBullet.s;
-   
-    if (aBullet.y > 600) {
-       aBullet.y = 0;
-    }
+    console.log(bullets.length);
 }
 
 function mouseupHandler() {
